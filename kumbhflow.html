@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KumbhFlow — Intelligent Crowd Intelligence Platform · Mahakumbh 2028</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Teko:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --saffron: #FF6B00;
+  --saffron-light: #FF8C35;
+  --saffron-glow: rgba(255,107,0,0.35);
+  --gold: #FFD700;
+  --gold-dim: #C9A227;
+  --navy-deep: #020818;
+  --navy: #040F24;
+  --navy-mid: #071530;
+  --navy-light: #0C2147;
+  --panel: rgba(8,24,58,0.85);
+  --panel-border: rgba(255,107,0,0.18);
+  --panel-border-bright: rgba(255,107,0,0.5);
+  --text-bright: #F0F4FF;
+  --text-mid: #8BA3CC;
+  --text-dim: #4A6080;
+  --red: #FF2D55;
+  --red-dim: rgba(255,45,85,0.15);
+  --yellow: #FFD60A;
+  --yellow-dim: rgba(255,214,10,0.15);
+  --green: #30D158;
+  --green-dim: rgba(48,209,88,0.15);
+  --critical: #FF2D55;
+  --warning: #FF9F0A;
+  --info: #0A84FF;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--navy-deep);
+  color: var(--text-bright);
+  font-family: 'Rajdhani', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ANIMATED BACKGROUND */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,107,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,0,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridPulse 8s ease-in-out infinite;
+}
+@keyframes gridPulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+.bg-orb1, .bg-orb2, .bg-orb3 {
+  position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; pointer-events:none;
+}
+.bg-orb1 { width:500px;height:500px;background:radial-gradient(circle,rgba(255,107,0,0.08),transparent 70%); top:-100px;left:-100px; animation:orbFloat1 15s ease-in-out infinite; }
+.bg-orb2 { width:400px;height:400px;background:radial-gradient(circle,rgba(0,80,200,0.1),transparent 70%); bottom:0;right:0; animation:orbFloat2 18s ease-in-out infinite; }
+.bg-orb3 { width:300px;height:300px;background:radial-gradient(circle,rgba(255,215,0,0.05),transparent 70%); top:50%;left:50%; animation:orbFloat3 12s ease-in-out infinite; }
+@keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,40px)} }
+@keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,-60px)} }
+@keyframes orbFloat3 { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.3)} }
+
+/* LAYOUT */
+.app { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; }
+
+/* HEADER */
+header {
+  background: rgba(4,15,36,0.95);
+  border-bottom: 1px solid var(--panel-border-bright);
+  padding: 0 24px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  backdrop-filter: blur(20px);
+  position: sticky; top: 0; z-index: 100;
+}
+.header-left { display:flex; align-items:center; gap:16px; }
+.logo-icon {
+  width:42px; height:42px; background:linear-gradient(135deg,var(--saffron),var(--gold));
+  border-radius:10px; display:grid; place-items:center; font-size:20px;
+  box-shadow: 0 0 20px var(--saffron-glow);
+}
+.logo-text { line-height:1; }
+.logo-name { font-family:'Teko',sans-serif; font-size:26px; font-weight:600; letter-spacing:3px; color:var(--text-bright); }
+.logo-sub { font-size:10px; letter-spacing:3px; color:var(--text-mid); text-transform:uppercase; }
+
+.header-center { display:flex; gap:8px; }
+.nav-tab {
+  padding: 6px 16px; border-radius:6px; font-size:13px; font-weight:600; letter-spacing:1px;
+  cursor:pointer; transition:all 0.2s; border:1px solid transparent; text-transform:uppercase;
+  color:var(--text-mid);
+}
+.nav-tab:hover { color:var(--text-bright); border-color:var(--panel-border-bright); }
+.nav-tab.active { background:var(--saffron); color:white; }
+
+.header-right { display:flex; align-items:center; gap:16px; }
+.live-badge {
+  display:flex; align-items:center; gap:6px; padding:5px 12px;
+  background:rgba(48,209,88,0.1); border:1px solid rgba(48,209,88,0.3);
+  border-radius:20px; font-size:11px; font-weight:700; letter-spacing:2px; color:var(--green); text-transform:uppercase;
+}
+.live-dot { width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.clock { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--saffron); }
+.refresh-info { font-size:11px; color:var(--text-dim); }
+
+/* MAIN CONTENT */
+main { flex:1; padding:20px 24px; display:flex; flex-direction:column; gap:20px; }
+
+/* STATS ROW */
+.stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+.stat-card {
+  background:var(--panel); border:1px solid var(--panel-border);
+  border-radius:12px; padding:16px 18px;
+  display:flex; flex-direction:column; gap:4px;
+  position:relative; overflow:hidden; transition:all 0.3s;
+}
+.stat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--saffron),var(--gold));
+}
+.stat-card:hover { border-color:var(--panel-border-bright); transform:translateY(-2px); }
+.stat-label { font-size:10px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+.stat-value { font-family:'Teko',sans-serif; font-size:32px; font-weight:500; color:var(--saffron); line-height:1; }
+.stat-sub { font-size:11px; color:var(--text-mid); }
+.stat-card.critical .stat-value { color:var(--red); }
+.stat-card.critical::before { background:linear-gradient(90deg,var(--red),var(--saffron)); }
+
+/* MAIN GRID */
+.main-grid { display:grid; grid-template-columns:1fr 1.2fr 0.9fr; gap:16px; flex:1; }
+
+/* PANELS */
+.panel {
+  background:var(--panel); border:1px solid var(--panel-border);
+  border-radius:14px; overflow:hidden;
+  display:flex; flex-direction:column;
+  backdrop-filter: blur(10px);
+}
+.panel-header {
+  padding:14px 18px; border-bottom:1px solid var(--panel-border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(255,107,0,0.04);
+}
+.panel-title {
+  display:flex; align-items:center; gap:8px;
+  font-family:'Teko',sans-serif; font-size:17px; font-weight:500; letter-spacing:2px;
+  text-transform:uppercase; color:var(--saffron);
+}
+.panel-title span { font-size:16px; }
+.panel-badge {
+  font-size:10px; padding:3px 8px; border-radius:4px; letter-spacing:1px; font-weight:700;
+}
+.badge-live { background:rgba(48,209,88,0.15); color:var(--green); border:1px solid rgba(48,209,88,0.3); }
+.badge-ai { background:rgba(255,107,0,0.15); color:var(--saffron); border:1px solid var(--panel-border-bright); }
+.panel-body { padding:16px; flex:1; overflow:auto; }
+
+/* MAP */
+.map-container {
+  position:relative; width:100%; aspect-ratio:1/0.85;
+  background:linear-gradient(135deg,#061020 0%,#091830 50%,#06121e 100%);
+  border-radius:10px; overflow:hidden;
+}
+.map-svg { width:100%; height:100%; }
+
+/* River paths */
+.river { fill:none; stroke:#1A4A7A; stroke-width:18; stroke-linecap:round; opacity:0.6; }
+.river-shimmer { fill:none; stroke:#2A6AAA; stroke-width:3; stroke-linecap:round; opacity:0.4; stroke-dasharray:20 30; animation:riverFlow 4s linear infinite; }
+@keyframes riverFlow { to{stroke-dashoffset:-100} }
+
+.map-location { cursor:pointer; }
+.loc-ring {
+  fill:none; stroke-width:1.5; opacity:0.5;
+  animation:ringPulse 2s ease-in-out infinite;
+}
+@keyframes ringPulse { 0%,100%{r:18;opacity:0.5} 50%{r:24;opacity:0.1} }
+.loc-circle { transition:all 0.3s; }
+.map-location:hover .loc-circle { filter:brightness(1.3) drop-shadow(0 0 8px currentColor); }
+.loc-label {
+  fill:#CBD5E8; font-family:'Rajdhani',sans-serif; font-size:9px; font-weight:600;
+  text-anchor:middle; pointer-events:none;
+}
+
+/* TOOLTIP */
+.map-tooltip {
+  position:absolute; background:rgba(4,15,36,0.95); border:1px solid var(--panel-border-bright);
+  border-radius:8px; padding:10px 14px; font-size:12px; pointer-events:none;
+  opacity:0; transition:opacity 0.2s; z-index:10; min-width:140px;
+  backdrop-filter:blur(10px);
+}
+.tooltip-name { font-weight:700; color:var(--text-bright); margin-bottom:4px; }
+.tooltip-row { display:flex; justify-content:space-between; gap:16px; color:var(--text-mid); }
+.tooltip-val { font-family:'IBM Plex Mono',monospace; }
+
+/* DENSITY LIST */
+.density-list { display:flex; flex-direction:column; gap:8px; }
+.density-item {
+  display:grid; grid-template-columns:1fr auto;
+  gap:6px; align-items:center;
+}
+.density-name { font-size:13px; font-weight:600; color:var(--text-mid); grid-column:1; }
+.density-pct { font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:500; text-align:right; }
+.density-bar-bg {
+  grid-column:1/-1; height:5px; background:rgba(255,255,255,0.06);
+  border-radius:3px; overflow:hidden;
+}
+.density-bar-fill { height:100%; border-radius:3px; transition:width 1s ease; }
+.density-item.high .density-pct { color:var(--red); }
+.density-item.high .density-bar-fill { background:linear-gradient(90deg,#FF2D55,#FF6B00); }
+.density-item.med .density-pct { color:var(--yellow); }
+.density-item.med .density-bar-fill { background:linear-gradient(90deg,#FF9F0A,#FFD60A); }
+.density-item.low .density-pct { color:var(--green); }
+.density-item.low .density-bar-fill { background:linear-gradient(90deg,#30D158,#34C759); }
+
+/* PREDICTION CHART */
+.chart-container { width:100%; height:160px; position:relative; }
+.chart-svg { width:100%; height:100%; }
+.chart-bar { transition:all 0.8s ease; cursor:pointer; }
+.chart-bar:hover { filter:brightness(1.3); }
+.chart-bar.current { filter:drop-shadow(0 0 6px var(--saffron)); }
+.chart-label { fill:#4A6080; font-family:'IBM Plex Mono',monospace; font-size:8px; text-anchor:middle; }
+.chart-pct { fill:#8BA3CC; font-family:'IBM Plex Mono',monospace; font-size:8px; text-anchor:middle; }
+.chart-grid { stroke:rgba(255,255,255,0.05); stroke-width:1; }
+
+/* BOTTOM GRID */
+.bottom-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+
+/* ROUTES */
+.route-item {
+  padding:12px 14px; border-radius:10px; border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.02); cursor:pointer; transition:all 0.3s;
+  display:flex; flex-direction:column; gap:6px;
+}
+.route-item:hover { border-color:var(--panel-border-bright); background:rgba(255,107,0,0.04); }
+.route-item.recommended { border-color:var(--saffron); background:rgba(255,107,0,0.06); }
+.route-top { display:flex; align-items:center; justify-content:space-between; }
+.route-num {
+  width:24px; height:24px; border-radius:6px; display:grid; place-items:center;
+  font-family:'Teko',sans-serif; font-size:15px; font-weight:600; background:var(--navy-light);
+}
+.route-item.recommended .route-num { background:var(--saffron); color:white; }
+.route-name { font-size:13px; font-weight:700; color:var(--text-bright); flex:1; margin:0 8px; }
+.rec-tag { font-size:9px; padding:2px 6px; background:var(--saffron); color:white; border-radius:3px; letter-spacing:1px; font-weight:700; }
+.route-time { font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:500; color:var(--saffron); }
+.route-path { font-size:11px; color:var(--text-dim); line-height:1.4; }
+.route-crowd-badge {
+  display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;
+}
+.crowd-low { background:var(--green-dim); color:var(--green); }
+.crowd-med { background:var(--yellow-dim); color:var(--yellow); }
+.crowd-high { background:var(--red-dim); color:var(--red); }
+
+/* ALERTS */
+.alert-item {
+  padding:12px 14px; border-radius:10px; margin-bottom:10px;
+  border-left:3px solid; display:flex; gap:12px; align-items:flex-start;
+}
+.alert-item.critical { border-color:var(--critical); background:rgba(255,45,85,0.07); }
+.alert-item.warning { border-color:var(--warning); background:rgba(255,159,10,0.07); }
+.alert-item.info { border-color:var(--info); background:rgba(10,132,255,0.07); }
+.alert-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+.alert-content { flex:1; }
+.alert-title { font-size:13px; font-weight:700; margin-bottom:2px; }
+.alert-item.critical .alert-title { color:var(--critical); }
+.alert-item.warning .alert-title { color:var(--warning); }
+.alert-item.info .alert-title { color:var(--info); }
+.alert-desc { font-size:12px; color:var(--text-mid); line-height:1.4; }
+.alert-time { font-size:10px; color:var(--text-dim); margin-top:3px; font-family:'IBM Plex Mono',monospace; }
+
+/* CHATBOT */
+.chat-messages {
+  flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;
+  min-height:180px; max-height:240px;
+}
+.chat-messages::-webkit-scrollbar { width:3px; }
+.chat-messages::-webkit-scrollbar-track { background:transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background:var(--panel-border-bright); border-radius:3px; }
+.msg { display:flex; gap:8px; align-items:flex-start; }
+.msg.user { flex-direction:row-reverse; }
+.msg-avatar {
+  width:28px; height:28px; border-radius:7px; display:grid; place-items:center;
+  font-size:12px; flex-shrink:0;
+}
+.msg.bot .msg-avatar { background:linear-gradient(135deg,var(--saffron),var(--gold)); }
+.msg.user .msg-avatar { background:var(--navy-light); border:1px solid var(--panel-border); }
+.msg-bubble {
+  max-width:85%; padding:8px 12px; border-radius:10px; font-size:12px; line-height:1.5;
+}
+.msg.bot .msg-bubble { background:rgba(255,107,0,0.08); border:1px solid rgba(255,107,0,0.15); color:var(--text-bright); }
+.msg.user .msg-bubble { background:var(--navy-light); border:1px solid var(--panel-border); color:var(--text-mid); text-align:right; }
+.typing { display:flex; gap:4px; align-items:center; padding:10px 14px; }
+.typing-dot { width:5px;height:5px;border-radius:50%;background:var(--saffron);animation:typingAnim 1.2s infinite; }
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes typingAnim{0%,100%{transform:translateY(0);opacity:0.4}50%{transform:translateY(-4px);opacity:1}}
+
+.quick-prompts { display:flex; flex-wrap:wrap; gap:6px; padding:0 14px 10px; }
+.qp-btn {
+  padding:4px 10px; border-radius:20px; font-size:10px; font-weight:600; letter-spacing:0.5px;
+  border:1px solid var(--panel-border); color:var(--text-dim); background:transparent;
+  cursor:pointer; transition:all 0.2s; font-family:'Rajdhani',sans-serif;
+}
+.qp-btn:hover { border-color:var(--saffron); color:var(--saffron); background:rgba(255,107,0,0.06); }
+.chat-input-row {
+  padding:12px 14px; border-top:1px solid var(--panel-border);
+  display:flex; gap:8px;
+}
+.chat-input {
+  flex:1; background:rgba(255,255,255,0.04); border:1px solid var(--panel-border);
+  border-radius:8px; padding:8px 12px; color:var(--text-bright); font-family:'Rajdhani',sans-serif;
+  font-size:13px; outline:none; transition:border-color 0.2s;
+}
+.chat-input:focus { border-color:var(--panel-border-bright); }
+.chat-input::placeholder { color:var(--text-dim); }
+.send-btn {
+  width:36px; height:36px; border-radius:8px; background:var(--saffron); border:none;
+  cursor:pointer; color:white; font-size:15px; transition:all 0.2s; display:grid; place-items:center;
+}
+.send-btn:hover { background:var(--saffron-light); transform:scale(1.05); }
+
+/* SIMULATION TAB */
+.sim-panel { display:flex; flex-direction:column; gap:14px; }
+.sim-control { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--panel-border); }
+.sim-label { font-size:13px; font-weight:600; color:var(--text-mid); }
+.sim-value { font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--saffron); }
+.toggle-switch { width:40px; height:22px; background:var(--navy-light); border-radius:11px; cursor:pointer; position:relative; border:1px solid var(--panel-border); transition:background 0.3s; }
+.toggle-switch.on { background:var(--saffron); }
+.toggle-knob { position:absolute; width:16px; height:16px; background:white; border-radius:50%; top:2px; left:2px; transition:transform 0.3s; }
+.toggle-switch.on .toggle-knob { transform:translateX(18px); }
+
+/* HEATMAP LEGEND */
+.legend { display:flex; gap:12px; padding:8px 0 0; }
+.legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-dim); }
+.legend-dot { width:8px; height:8px; border-radius:50%; }
+
+/* TABS */
+.tab-content { display:none; }
+.tab-content.active { display:flex; flex-direction:column; gap:20px; }
+
+/* SIMULATION VIEW */
+.sim-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.sim-zone-card {
+  background:var(--panel); border:1px solid var(--panel-border); border-radius:12px; padding:14px;
+  display:flex; flex-direction:column; gap:8px; transition:all 0.3s;
+}
+.sim-zone-card.critical-zone { border-color:rgba(255,45,85,0.4); background:rgba(255,45,85,0.05); }
+.sim-zone-card.warning-zone { border-color:rgba(255,159,10,0.4); background:rgba(255,159,10,0.05); }
+.sim-zone-name { font-size:14px; font-weight:700; color:var(--text-bright); }
+.sim-zone-count { font-family:'Teko',sans-serif; font-size:28px; color:var(--saffron); line-height:1; }
+.sim-zone-label { font-size:11px; color:var(--text-dim); }
+.capacity-bar { height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; margin-top:4px; }
+.capacity-fill { height:100%; border-radius:3px; transition:width 1s ease; }
+
+/* ANALYTICS VIEW */
+.analytics-grid { display:grid; grid-template-columns:1.5fr 1fr; gap:16px; }
+.analytics-card { background:var(--panel); border:1px solid var(--panel-border); border-radius:14px; padding:18px; }
+.analytics-title { font-family:'Teko',sans-serif; font-size:18px; color:var(--saffron); letter-spacing:2px; text-transform:uppercase; margin-bottom:14px; }
+.trend-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+.trend-label { font-size:13px; color:var(--text-mid); }
+.trend-val { font-family:'IBM Plex Mono',monospace; font-size:13px; }
+.trend-up { color:var(--red); }
+.trend-down { color:var(--green); }
+.trend-neutral { color:var(--yellow); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--panel-border); border-radius:4px; }
+
+/* FOOTER */
+footer {
+  padding: 10px 24px;
+  border-top: 1px solid var(--panel-border);
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:11px; color:var(--text-dim);
+  background: rgba(4,15,36,0.8);
+}
+
+/* RESPONSIVE */
+@media (max-width:1200px) {
+  .main-grid { grid-template-columns:1fr 1fr; }
+  .bottom-grid { grid-template-columns:1fr 1fr; }
+  .stats-row { grid-template-columns:repeat(3,1fr); }
+}
+
+/* ANIMATIONS */
+@keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.stat-card { animation:fadeInUp 0.5s ease both; }
+.stat-card:nth-child(1){animation-delay:0.05s}
+.stat-card:nth-child(2){animation-delay:0.1s}
+.stat-card:nth-child(3){animation-delay:0.15s}
+.stat-card:nth-child(4){animation-delay:0.2s}
+.stat-card:nth-child(5){animation-delay:0.25s}
+
+/* SCAN LINE */
+.scan-line {
+  position:fixed; top:0; left:0; width:100%; height:2px;
+  background:linear-gradient(90deg,transparent,var(--saffron),transparent);
+  animation:scanLine 6s linear infinite; z-index:200; pointer-events:none; opacity:0.3;
+}
+@keyframes scanLine { from{top:-2px} to{top:100vh} }
+
+/* INCIDENT MARQUEE */
+.marquee-bar {
+  background:rgba(255,45,85,0.1); border-top:1px solid rgba(255,45,85,0.2);
+  border-bottom:1px solid rgba(255,45,85,0.2); padding:6px 0; overflow:hidden;
+  display:flex; align-items:center; gap:0;
+}
+.marquee-label {
+  background:var(--red); color:white; padding:0 14px; font-size:10px; font-weight:800;
+  letter-spacing:2px; white-space:nowrap; text-transform:uppercase; height:22px; display:grid; place-items:center;
+  flex-shrink:0;
+}
+.marquee-track { overflow:hidden; flex:1; }
+.marquee-inner {
+  display:flex; gap:60px; white-space:nowrap;
+  animation:marqueeScroll 30s linear infinite;
+  font-size:11px; color:var(--text-mid); letter-spacing:0.5px;
+}
+@keyframes marqueeScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.marquee-dot { color:var(--saffron); }
+</style>
+</head>
+<body>
+<div class="scan-line"></div>
+<div class="bg-grid"></div>
+<div class="bg-orb1"></div>
+<div class="bg-orb2"></div>
+<div class="bg-orb3"></div>
+
+<div class="app">
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <div class="logo-icon">🕉</div>
+      <div class="logo-text">
+        <div class="logo-name">KUMBHFLOW</div>
+        <div class="logo-sub">Intelligent Crowd Intelligence · Mahakumbh 2028</div>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="nav-tab active" onclick="switchTab('dashboard',this)">Dashboard</div>
+      <div class="nav-tab" onclick="switchTab('simulation',this)">Simulation</div>
+      <div class="nav-tab" onclick="switchTab('analytics',this)">Analytics</div>
+      <div class="nav-tab" onclick="switchTab('authority',this)">Authority View</div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div class="clock" id="clock">--:--:--</div>
+      <div class="refresh-info">Next update: <span id="countdown" style="color:var(--saffron)">30s</span></div>
+    </div>
+  </header>
+
+  <!-- INCIDENT MARQUEE -->
+  <div class="marquee-bar">
+    <div class="marquee-label">⚠ ALERTS</div>
+    <div class="marquee-track">
+      <div class="marquee-inner" id="marquee-inner">
+        <span>🔴 Critical congestion at Dashashwamedh Ghat — 89% capacity</span>
+        <span class="marquee-dot">◆</span>
+        <span>⚠ Parking Zone B approaching threshold — alternate routes recommended</span>
+        <span class="marquee-dot">◆</span>
+        <span>🟡 Prayagraj Junction: elevated crowd levels, expect 20min delay</span>
+        <span class="marquee-dot">◆</span>
+        <span>✅ Triveni Sangam currently accessible — crowd density: LOW</span>
+        <span class="marquee-dot">◆</span>
+        <span>🚌 Free shuttle service active: Junction → Triveni Sangam every 15 mins</span>
+        <span class="marquee-dot">◆</span>
+        <span>🔴 Critical congestion at Dashashwamedh Ghat — 89% capacity</span>
+        <span class="marquee-dot">◆</span>
+        <span>⚠ Parking Zone B approaching threshold — alternate routes recommended</span>
+        <span class="marquee-dot">◆</span>
+        <span>🟡 Prayagraj Junction: elevated crowd levels, expect 20min delay</span>
+        <span class="marquee-dot">◆</span>
+        <span>✅ Triveni Sangam currently accessible — crowd density: LOW</span>
+        <span class="marquee-dot">◆</span>
+        <span>🚌 Free shuttle service active: Junction → Triveni Sangam every 15 mins</span>
+        <span class="marquee-dot">◆</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- DASHBOARD TAB -->
+    <div class="tab-content active" id="tab-dashboard">
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Pilgrims (Est.)</div>
+          <div class="stat-value" id="stat-pilgrims">0.6M</div>
+          <div class="stat-sub">+12% from yesterday</div>
+        </div>
+        <div class="stat-card critical">
+          <div class="stat-label">Avg. Crowd Density</div>
+          <div class="stat-value" id="stat-density">57%</div>
+          <div class="stat-sub">↑ Rising trend</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Hottest Zone</div>
+          <div class="stat-value" style="font-size:20px;padding-top:4px;" id="stat-hotzone">Dashashwamedh</div>
+          <div class="stat-sub">89% capacity</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Safe Routes Active</div>
+          <div class="stat-value">3</div>
+          <div class="stat-sub">All verified clear</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Incidents</div>
+          <div class="stat-value" style="color:var(--red)" id="stat-incidents">2</div>
+          <div class="stat-sub">1 critical, 1 warning</div>
+        </div>
+      </div>
+
+      <!-- MAIN 3-COL GRID -->
+      <div class="main-grid">
+        <!-- MAP -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>🗺</span> Crowd Heatmap — Prayagraj</div>
+            <div class="panel-badge badge-live">LIVE</div>
+          </div>
+          <div class="panel-body" style="padding:12px">
+            <div class="map-container" id="mapContainer">
+              <svg class="map-svg" viewBox="0 0 400 340" id="mapSvg">
+                <!-- Background -->
+                <rect width="400" height="340" fill="#061020"/>
+                <!-- Grid lines -->
+                <line x1="0" y1="85" x2="400" y2="85" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                <line x1="0" y1="170" x2="400" y2="170" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                <line x1="0" y1="255" x2="400" y2="255" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                <line x1="100" y1="0" x2="100" y2="340" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                <line x1="200" y1="0" x2="200" y2="340" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                <line x1="300" y1="0" x2="300" y2="340" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+                <!-- Ganga -->
+                <path d="M 0 140 Q 60 130 130 145 Q 200 160 270 150 Q 340 140 400 150" class="river"/>
+                <path d="M 0 140 Q 60 130 130 145 Q 200 160 270 150 Q 340 140 400 150" class="river-shimmer"/>
+                <!-- Yamuna -->
+                <path d="M 200 0 Q 210 50 205 100 Q 200 130 210 150" class="river"/>
+                <path d="M 200 0 Q 210 50 205 100 Q 200 130 210 150" class="river-shimmer" style="animation-delay:-2s"/>
+                <!-- Saraswati (invisible/mythical - dotted) -->
+                <path d="M 240 0 Q 235 60 225 100 Q 218 130 210 150" stroke="#1A3A5A" stroke-width="2" fill="none" stroke-dasharray="6 8" opacity="0.3"/>
+
+                <!-- River Labels -->
+                <text x="60" y="128" fill="#2A6AAA" font-size="8" font-family="Rajdhani,sans-serif" opacity="0.8">GANGA</text>
+                <text x="185" y="45" fill="#2A6AAA" font-size="8" font-family="Rajdhani,sans-serif" opacity="0.8" transform="rotate(-80,185,45)">YAMUNA</text>
+
+                <!-- LOCATIONS will be rendered by JS -->
+                <g id="locationLayer"></g>
+              </svg>
+              <div class="map-tooltip" id="mapTooltip"></div>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>High (70%+)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Medium (40–69%)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Low (&lt;40%)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MIDDLE COL: Density + Chart + Routes -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- DENSITY -->
+          <div class="panel" style="flex:0 0 auto;">
+            <div class="panel-header">
+              <div class="panel-title"><span>📊</span> Live Crowd Density</div>
+              <div class="panel-badge badge-live">AUTO-REFRESH</div>
+            </div>
+            <div class="panel-body" style="padding:12px 16px;">
+              <div class="density-list" id="densityList"></div>
+            </div>
+          </div>
+          <!-- PREDICTION CHART -->
+          <div class="panel" style="flex:0 0 auto;">
+            <div class="panel-header">
+              <div class="panel-title"><span>📈</span> Hourly Crowd Prediction</div>
+              <div style="font-size:10px;color:var(--text-dim)">ML-BASED FORECAST</div>
+            </div>
+            <div class="panel-body" style="padding:12px;">
+              <div class="chart-container">
+                <svg class="chart-svg" id="chartSvg" viewBox="0 0 460 150"></svg>
+              </div>
+            </div>
+          </div>
+          <!-- ROUTES -->
+          <div class="panel" style="flex:0 0 auto;">
+            <div class="panel-header">
+              <div class="panel-title"><span>🧭</span> Recommended Safe Routes</div>
+              <div class="panel-badge badge-live">OPTIMIZED</div>
+            </div>
+            <div class="panel-body" id="routeList" style="padding:12px;display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COL: Alerts + Chat -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- ALERTS -->
+          <div class="panel" style="flex:0 0 auto;">
+            <div class="panel-header">
+              <div class="panel-title"><span>⚠️</span> Active Alerts</div>
+              <div class="panel-badge" style="background:rgba(255,45,85,0.15);color:var(--red);border:1px solid rgba(255,45,85,0.3);" id="alertCount">3 ACTIVE</div>
+            </div>
+            <div class="panel-body" id="alertList" style="padding:12px;"></div>
+          </div>
+          <!-- AI CHATBOT -->
+          <div class="panel" style="flex:1;">
+            <div class="panel-header">
+              <div class="panel-title"><span>🤖</span> KumbhFlow AI</div>
+              <div class="panel-badge badge-ai">GPT-POWERED</div>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="quick-prompts">
+              <button class="qp-btn" onclick="sendQuick('Which ghat is least crowded right now?')">Least crowded?</button>
+              <button class="qp-btn" onclick="sendQuick('Safest route to Triveni Sangam?')">Route to Sangam</button>
+              <button class="qp-btn" onclick="sendQuick('Best time to visit today?')">Best time?</button>
+              <button class="qp-btn" onclick="sendQuick('Where should I park?')">Parking info</button>
+              <button class="qp-btn" onclick="sendQuick('Emergency procedures?')">Emergency</button>
+            </div>
+            <div class="chat-input-row">
+              <input class="chat-input" id="chatInput" placeholder="Ask about crowd conditions..." onkeydown="if(event.key==='Enter')sendChat()"/>
+              <button class="send-btn" onclick="sendChat()">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULATION TAB -->
+    <div class="tab-content" id="tab-simulation">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span>⚙️</span> Simulation Controls</div>
+          </div>
+          <div class="panel-body">
+            <div class="sim-panel">
+              <div class="sim-control">
+                <span class="sim-label">Simulation Mode</span>
+                <div class="toggle-switch on" id="simToggle" onclick="toggleSim()"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="sim-control">
+                <span class="sim-label">Event Type</span>
+                <select id="eventType" style="background:var(--navy-light);border:1px solid var(--panel-border);color:var(--text-bright);padding:4px 8px;border-radius:6px;font-family:Rajdhani,sans-serif;font-size:13px;" onchange="updateSimulation()">
+                  <option value="normal">Normal Day</option>
+                  <option value="snan">Major Snan (Holy Dip)</option>
+                  <option value="festival">Festival Peak</option>
+                  <option value="emergency">Emergency Scenario</option>
+                </select>
+              </div>
+              <div class="sim-control">
+                <span class="sim-label">Time of Day</span>
+                <input type="range" id="simTime" min="6" max="23" value="11" style="flex:1;margin:0 12px;accent-color:var(--saffron);" oninput="document.getElementById('simTimeVal').textContent=this.value+':00';updateSimulation()"/>
+                <span class="sim-value" id="simTimeVal">11:00</span>
+              </div>
+              <div class="sim-control">
+                <span class="sim-label">Crowd Multiplier</span>
+                <input type="range" id="crowdMult" min="50" max="200" value="100" style="flex:1;margin:0 12px;accent-color:var(--saffron);" oninput="document.getElementById('crowdMultVal').textContent=this.value+'%';updateSimulation()"/>
+                <span class="sim-value" id="crowdMultVal">100%</span>
+              </div>
+              <div style="padding:10px;background:rgba(255,107,0,0.06);border-radius:8px;border:1px solid var(--panel-border);font-size:12px;color:var(--text-mid);line-height:1.6;" id="simDescription">
+                Standard crowd conditions. All ghats accessible. Normal flow rates. Expect moderate congestion at major ghats during peak hours (10AM–4PM).
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="margin-bottom:12px;font-family:'Teko',sans-serif;font-size:20px;letter-spacing:2px;color:var(--saffron);text-transform:uppercase;">Zone-by-Zone Crowd Simulation</div>
+          <div class="sim-grid" id="simGrid"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>📊</span> Crowd Flow Simulation — Hourly Timeline</div>
+        </div>
+        <div class="panel-body">
+          <div style="height:180px;">
+            <svg width="100%" height="180" id="simChartSvg" viewBox="0 0 900 180"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS TAB -->
+    <div class="tab-content" id="tab-analytics">
+      <div class="analytics-grid">
+        <div>
+          <div class="analytics-card">
+            <div class="analytics-title">📉 Crowd Trend Analysis</div>
+            <svg width="100%" height="200" viewBox="0 0 500 200" id="trendSvg"></svg>
+          </div>
+          <div class="analytics-card" style="margin-top:16px;">
+            <div class="analytics-title">🗓 Peak Hours Forecast (Next 7 Days)</div>
+            <div id="peakForecast"></div>
+          </div>
+        </div>
+        <div>
+          <div class="analytics-card">
+            <div class="analytics-title">📋 Key Metrics</div>
+            <div id="metricsTable"></div>
+          </div>
+          <div class="analytics-card" style="margin-top:16px;">
+            <div class="analytics-title">🎯 AI Recommendations</div>
+            <div id="aiRecs" style="font-size:13px;color:var(--text-mid);line-height:1.8;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTHORITY VIEW TAB -->
+    <div class="tab-content" id="tab-authority">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title"><span>🚔</span> Police Deployment</div></div>
+          <div class="panel-body" id="policePanel"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title"><span>🏥</span> Medical Units</div></div>
+          <div class="panel-body" id="medicalPanel"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title"><span>📢</span> Broadcast Messages</div></div>
+          <div class="panel-body" id="broadcastPanel"></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:16px;">
+        <div class="panel-header"><div class="panel-title"><span>📋</span> Incident Log</div></div>
+        <div class="panel-body" id="incidentLog"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div>🕉 KumbhFlow v2.0 — Intelligent Crowd Intelligence Platform · Mahakumbh 2028</div>
+    <div>Built with AI-Assisted Development · Expert Hire × VIT Bhopal Hackathon</div>
+    <div id="footerStatus" style="color:var(--green);">● All systems operational</div>
+  </footer>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const LOCATIONS = [
+  { id:'triveni',  name:'Triveni Sangam', x:210, y:150, pilgrims:85000,  capacity:800000 },
+  { id:'ram',      name:'Ram Ghat',       x:110, y:148, pilgrims:220000, capacity:450000 },
+  { id:'dasha',    name:'Dashashwamedh',  x:300, y:145, pilgrims:410000, capacity:460000 },
+  { id:'junction', name:'Prayagraj Jn.',  x:340, y:230, pilgrims:310000, capacity:420000 },
+  { id:'parkA',    name:'Parking Zone A', x:90,  y:220, pilgrims:180000, capacity:380000 },
+  { id:'parkB',    name:'Parking Zone B', x:190, y:265, pilgrims:295000, capacity:380000 },
+  { id:'parkC',    name:'Parking Zone C', x:290, y:275, pilgrims:162000, capacity:380000 },
+  { id:'bazaar',   name:'Main Bazaar',    x:150, y:200, pilgrims:200000, capacity:350000 },
+];
+
+const HOURLY_BASE = [12,18,28,52,68,74,82,88,92,88,80,72,68,62,55,48,42,35,28,22,16,12,10,8];
+// indices 0..23 for hours 0..23; we show 6AM(6) to 11PM(23)
+
+const ROUTES = [
+  { num:1, name:'Northern Riverside Path', rec:true,  time:'29 min', crowd:'Low · 29%',  level:'low',  path:'Parking A → Civil Lines → Ram Ghat → Triveni Sangam' },
+  { num:2, name:'Eastern Express Corridor', rec:false, time:'48 min', crowd:'Med · 55%',  level:'med',  path:'Junction → MG Road → Dashashwamedh → Sangam (via pontoon bridge)' },
+  { num:3, name:'Western Bazaar Bypass',    rec:false, time:'54 min', crowd:'Low · 27%',  level:'low',  path:'Parking C → Bazaar Lane → Sangam (west bank)' },
+];
+
+const ALERTS_DATA = [
+  { type:'critical', icon:'🚨', title:'Severe Congestion Alert', desc:'Stampede risk elevated near Dashashwamedh Ghat. Follow police barricade directions immediately.', time:'2 min ago' },
+  { type:'warning',  icon:'⚡', title:'Crowd Surge Warning',     desc:'Parking Zone B approaching critical threshold (78%). Consider alternate ghat access points.', time:'8 min ago' },
+  { type:'info',     icon:'ℹ️', title:'Advisory Notice',         desc:'Free shuttle service available from Prayagraj Junction to Triveni Sangam every 15 minutes.', time:'12 min ago' },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let crowdData = JSON.parse(JSON.stringify(LOCATIONS));
+let countdownVal = 30;
+let simRunning = true;
+
+// ============================================================
+// UTILS
+// ============================================================
+function getDensityPct(loc) {
+  return Math.round(loc.pilgrims / loc.capacity * 100);
+}
+function getLevel(pct) {
+  if (pct >= 70) return 'high';
+  if (pct >= 40) return 'med';
+  return 'low';
+}
+function getColor(pct) {
+  if (pct >= 70) return '#FF2D55';
+  if (pct >= 40) return '#FFD60A';
+  return '#30D158';
+}
+function fmtNum(n) {
+  if (n>=1000000) return (n/1000000).toFixed(1)+'M';
+  if (n>=1000) return Math.round(n/1000)+'K';
+  return n;
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ============================================================
+// COUNTDOWN + DATA REFRESH
+// ============================================================
+function refreshData() {
+  crowdData.forEach(loc => {
+    const delta = (Math.random()-0.45)*30000;
+    loc.pilgrims = Math.max(10000, Math.min(loc.capacity, loc.pilgrims+delta));
+  });
+  renderDensityList();
+  renderMap();
+  updateStats();
+  renderSimGrid();
+}
+
+setInterval(()=>{
+  countdownVal--;
+  document.getElementById('countdown').textContent = countdownVal+'s';
+  if (countdownVal<=0) {
+    countdownVal = 30;
+    if (simRunning) refreshData();
+  }
+}, 1000);
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+  const total = crowdData.reduce((a,b)=>a+b.pilgrims,0);
+  const avgPct = Math.round(crowdData.reduce((a,b)=>a+getDensityPct(b),0)/crowdData.length);
+  const hottest = [...crowdData].sort((a,b)=>getDensityPct(b)-getDensityPct(a))[0];
+  document.getElementById('stat-pilgrims').textContent = fmtNum(total);
+  document.getElementById('stat-density').textContent = avgPct+'%';
+  document.getElementById('stat-hotzone').textContent = hottest.name.split(' ')[0];
+}
+
+// ============================================================
+// MAP
+// ============================================================
+function renderMap() {
+  const layer = document.getElementById('locationLayer');
+  layer.innerHTML = '';
+  crowdData.forEach(loc => {
+    const pct = getDensityPct(loc);
+    const col = getColor(pct);
+    const r = 14 + pct*0.1;
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','map-location');
+    g.setAttribute('data-id',loc.id);
+
+    // Pulse ring
+    const ring = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    ring.setAttribute('cx',loc.x); ring.setAttribute('cy',loc.y); ring.setAttribute('r',r+6);
+    ring.setAttribute('class','loc-ring'); ring.setAttribute('stroke',col);
+    if (pct<70) ring.style.animationDuration='3s';
+
+    // Main circle
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',loc.x); circle.setAttribute('cy',loc.y); circle.setAttribute('r',r);
+    circle.setAttribute('class','loc-circle');
+    circle.setAttribute('fill',col); circle.setAttribute('opacity','0.8');
+    circle.setAttribute('filter',`drop-shadow(0 0 ${pct>70?8:4}px ${col})`);
+
+    // Pct label
+    const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',loc.x); txt.setAttribute('y',loc.y+4);
+    txt.setAttribute('class','loc-label'); txt.setAttribute('fill','white');
+    txt.setAttribute('font-size','9'); txt.setAttribute('font-weight','700');
+    txt.textContent = pct+'%';
+
+    // Name
+    const name = document.createElementNS('http://www.w3.org/2000/svg','text');
+    name.setAttribute('x',loc.x); name.setAttribute('y',loc.y+r+13);
+    name.setAttribute('class','loc-label');
+    name.textContent = loc.name.split(' ').slice(0,2).join(' ');
+
+    g.appendChild(ring); g.appendChild(circle); g.appendChild(txt); g.appendChild(name);
+    g.addEventListener('mouseenter',e=>showTooltip(e,loc));
+    g.addEventListener('mouseleave',()=>hideTooltip());
+    layer.appendChild(g);
+  });
+}
+
+function showTooltip(e, loc) {
+  const pct = getDensityPct(loc);
+  const t = document.getElementById('mapTooltip');
+  const level = getLevel(pct);
+  const levelColors = {high:'var(--red)',med:'var(--yellow)',low:'var(--green)'};
+  t.innerHTML = `
+    <div class="tooltip-name">${loc.name}</div>
+    <div class="tooltip-row"><span>Pilgrims</span><span class="tooltip-val" style="color:var(--saffron)">${fmtNum(loc.pilgrims)}</span></div>
+    <div class="tooltip-row"><span>Density</span><span class="tooltip-val" style="color:${levelColors[level]}">${pct}%</span></div>
+    <div class="tooltip-row"><span>Status</span><span class="tooltip-val" style="color:${levelColors[level]}">${level.toUpperCase()}</span></div>
+    <div class="tooltip-row"><span>Capacity</span><span class="tooltip-val">${fmtNum(loc.capacity)}</span></div>
+  `;
+  const rect = document.getElementById('mapContainer').getBoundingClientRect();
+  const x = e.clientX - rect.left + 10;
+  const y = e.clientY - rect.top - 10;
+  t.style.left = Math.min(x, rect.width-160)+'px';
+  t.style.top = Math.max(0,y)+'px';
+  t.style.opacity = '1';
+}
+function hideTooltip() { document.getElementById('mapTooltip').style.opacity='0'; }
+
+// ============================================================
+// DENSITY LIST
+// ============================================================
+function renderDensityList() {
+  const sorted = [...crowdData].sort((a,b)=>getDensityPct(b)-getDensityPct(a));
+  const el = document.getElementById('densityList');
+  el.innerHTML = sorted.map(loc=>{
+    const pct=getDensityPct(loc), lvl=getLevel(pct);
+    return `
+    <div class="density-item ${lvl}">
+      <div class="density-name">${loc.name}</div>
+      <div class="density-pct">${pct}%</div>
+      <div class="density-bar-bg">
+        <div class="density-bar-fill" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// PREDICTION CHART
+// ============================================================
+function renderChart() {
+  const svg = document.getElementById('chartSvg');
+  const W=460, H=150, PAD={t:10,b:30,l:30,r:10};
+  const hours = Array.from({length:18},(_,i)=>i+6); // 6AM to 11PM
+  const pcts = hours.map(h=>HOURLY_BASE[h]);
+  const maxVal=100, barW=18, gap=6;
+  const nowHour = new Date().getHours();
+  const chartH = H-PAD.t-PAD.b;
+  const totalBars = hours.length;
+  const startX = PAD.l;
+
+  // Grid lines
+  let svgContent = '';
+  [25,50,75,100].forEach(v=>{
+    const y = PAD.t + chartH*(1-v/maxVal);
+    svgContent += `<line x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}" class="chart-grid"/>`;
+    svgContent += `<text x="${PAD.l-4}" y="${y+3}" class="chart-label" text-anchor="end">${v}</text>`;
+  });
+
+  hours.forEach((h,i)=>{
+    const pct=pcts[i];
+    const x=startX+i*(barW+gap);
+    const barH=chartH*(pct/maxVal);
+    const y=PAD.t+chartH-barH;
+    const isCurrent = h===nowHour;
+    const col=pct>=70?'#FF2D55':pct>=50?'#FF9F0A':pct>=30?'#FFD60A':'#30D158';
+    const extraClass = isCurrent?'chart-bar current':'chart-bar';
+    svgContent += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="${col}" opacity="${isCurrent?1:0.65}" class="${extraClass}"/>`;
+    if(isCurrent) svgContent+=`<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="none" stroke="var(--saffron)" stroke-width="1.5"/>`;
+    svgContent += `<text x="${x+barW/2}" y="${H-6}" class="chart-label">${h>12?h-12:h}${h>=12?'P':'A'}</text>`;
+    if(pct>=70||isCurrent) svgContent+=`<text x="${x+barW/2}" y="${y-3}" class="chart-pct">${pct}%</text>`;
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+// ============================================================
+// ROUTES
+// ============================================================
+function renderRoutes() {
+  document.getElementById('routeList').innerHTML = ROUTES.map(r=>`
+    <div class="route-item ${r.rec?'recommended':''}">
+      <div class="route-top">
+        <div class="route-num">${r.num}</div>
+        <div class="route-name">${r.name}${r.rec?' ★':''}</div>
+        ${r.rec?'<span class="rec-tag">BEST</span>':''}
+        <div class="route-time">${r.time}</div>
+      </div>
+      <div class="route-path">${r.path}</div>
+      <span class="route-crowd-badge crowd-${r.level}">${r.crowd}</span>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// ALERTS
+// ============================================================
+function renderAlerts() {
+  document.getElementById('alertList').innerHTML = ALERTS_DATA.map(a=>`
+    <div class="alert-item ${a.type}">
+      <div class="alert-icon">${a.icon}</div>
+      <div class="alert-content">
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+        <div class="alert-time">Updated ${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// CHATBOT
+// ============================================================
+const BOT_RESPONSES = {
+  default: [
+    "Based on current data, I recommend avoiding Dashashwamedh Ghat (89% capacity). Triveni Sangam is accessible at only 14% capacity.",
+    "Live crowd intelligence shows 3 safe routes active. Northern Riverside Path is fastest with only 29% crowd density.",
+    "Peak hours today are expected between 10AM–4PM. Plan your visit before 9AM or after 7PM for best experience.",
+    "Parking Zone C has lowest congestion at 45%. Shuttle buses available from all parking zones to the ghats.",
+    "Emergency services are stationed at all major ghats. In case of emergency, contact control room: 1920.",
+  ],
+  patterns: [
+    { keys:['crowd','crowded','busy','congested'], resp:"Current crowd levels: 🔴 Dashashwamedh (89%), Parking B (78%), Prayagraj Junction (76%). Safest locations: ✅ Triveni Sangam (14%), Parking C (45%)." },
+    { keys:['route','path','way','how to reach','navigate'], resp:"Best route right now: Northern Riverside Path → Parking A → Civil Lines → Ram Ghat → Triveni Sangam. Only 29% crowd density. Estimated time: 29 minutes." },
+    { keys:['time','when','best time','visit'], resp:"Best times to visit today: 🌅 Early morning (6AM–8AM) or 🌙 Evening (7PM–9PM). Avoid 10AM–4PM peak hours. Current time is optimal for visiting Triveni Sangam." },
+    { keys:['park','parking'], resp:"🅿 Parking Zone C is least congested (45%) and has free shuttle service to all ghats. Zones A & B have higher density. Use Zone C for quickest ghat access." },
+    { keys:['emergency','danger','help','sos','medical'], resp:"🚨 EMERGENCY: Call 112 (Police) or 108 (Ambulance). Medical posts at every ghat. Emergency exits marked in orange on all signboards. Control room: 1920." },
+    { keys:['triveni','sangam','prayag'], resp:"✅ Triveni Sangam is CLEAR right now at 14% capacity — best time to visit! Northern Riverside Path is recommended. Estimated travel time from Junction: 29 minutes." },
+    { keys:['prediction','forecast','tomorrow','predict'], resp:"ML prediction for next 4 hours: 12PM→88% peak, 1PM→92% critical, 3PM→88%, 5PM→72% moderate. Recommend visiting after 7PM for comfortable experience." },
+  ]
+};
+
+function addMessage(text, type='bot') {
+  const el = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg ${type}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${type==='bot'?'🤖':'👤'}</div>
+    <div class="msg-bubble">${text}</div>
+  `;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function showTyping() {
+  const el = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = 'typingIndicator';
+  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function getBotResponse(msg) {
+  const lower = msg.toLowerCase();
+  for (const p of BOT_RESPONSES.patterns) {
+    if (p.keys.some(k=>lower.includes(k))) return p.resp;
+  }
+  return BOT_RESPONSES.default[Math.floor(Math.random()*BOT_RESPONSES.default.length)];
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addMessage(msg, 'user');
+  showTyping();
+  setTimeout(()=>{
+    document.getElementById('typingIndicator')?.remove();
+    addMessage(getBotResponse(msg), 'bot');
+  }, 1000+Math.random()*800);
+}
+
+function sendQuick(msg) {
+  document.getElementById('chatInput').value = msg;
+  sendChat();
+}
+
+// ============================================================
+// SIMULATION TAB
+// ============================================================
+function renderSimGrid() {
+  const mult = parseInt(document.getElementById('crowdMult')?.value||100)/100;
+  const eventType = document.getElementById('eventType')?.value||'normal';
+  const eventMult = {normal:1, snan:1.8, festival:2.2, emergency:0.5}[eventType]||1;
+  document.getElementById('simGrid').innerHTML = crowdData.map(loc=>{
+    const adj = Math.min(loc.capacity, Math.round(loc.pilgrims*mult*eventMult));
+    const pct = Math.round(adj/loc.capacity*100);
+    const lvl = pct>=80?'critical-zone':pct>=60?'warning-zone':'';
+    const col = getColor(pct);
+    return `
+    <div class="sim-zone-card ${lvl}">
+      <div class="sim-zone-name">${loc.name}</div>
+      <div class="sim-zone-count" style="color:${col}">${fmtNum(adj)}</div>
+      <div class="sim-zone-label">pilgrims · ${pct}% capacity</div>
+      <div class="capacity-bar"><div class="capacity-fill" style="width:${pct}%;background:${col}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSim() {
+  simRunning = !simRunning;
+  const t = document.getElementById('simToggle');
+  t.classList.toggle('on',simRunning);
+}
+
+const SIM_DESCRIPTIONS = {
+  normal:'Standard crowd conditions. All ghats accessible. Normal flow rates. Expect moderate congestion at major ghats during peak hours (10AM–4PM).',
+  snan:'Major Snan event active! Crowd density 1.8× normal. Dashashwamedh and Triveni Sangam at near-maximum capacity. All emergency services on standby.',
+  festival:'Festival peak scenario. All locations at 2.2× normal density. Critical overcrowding expected. Authorities should activate crowd dispersal protocols.',
+  emergency:'Emergency dispersal scenario. All entry points restricted. Crowd being redirected to designated safe zones. Emergency vehicles have priority access.',
+};
+
+function updateSimulation() {
+  const et=document.getElementById('eventType').value;
+  document.getElementById('simDescription').textContent=SIM_DESCRIPTIONS[et];
+  renderSimGrid();
+  renderSimChart();
+}
+
+function renderSimChart() {
+  const svg=document.getElementById('simChartSvg');
+  const eventType=document.getElementById('eventType')?.value||'normal';
+  const mult=parseInt(document.getElementById('crowdMult')?.value||100)/100;
+  const emult={normal:1,snan:1.8,festival:2.2,emergency:0.5}[eventType]||1;
+  const W=900,H=180,PAD={t:10,b:30,l:40,r:10};
+  const hours=Array.from({length:18},(_,i)=>i+6);
+  const pcts=hours.map(h=>Math.min(100,Math.round(HOURLY_BASE[h]*mult*emult)));
+  const barW=38,gap=8,chartH=H-PAD.t-PAD.b,startX=PAD.l;
+  let s='';
+  [25,50,75,100].forEach(v=>{
+    const y=PAD.t+chartH*(1-v/100);
+    s+=`<line x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+    s+=`<text x="${PAD.l-4}" y="${y+3}" fill="#4A6080" font-size="9" font-family="IBM Plex Mono,monospace" text-anchor="end">${v}%</text>`;
+  });
+  hours.forEach((h,i)=>{
+    const pct=pcts[i],x=startX+i*(barW+gap),bH=chartH*(pct/100),y=PAD.t+chartH-bH;
+    const col=pct>=80?'#FF2D55':pct>=60?'#FF9F0A':pct>=40?'#FFD60A':'#30D158';
+    s+=`<rect x="${x}" y="${y}" width="${barW}" height="${bH}" rx="4" fill="${col}" opacity="0.75"/>`;
+    s+=`<text x="${x+barW/2}" y="${H-6}" fill="#4A6080" font-size="9" font-family="IBM Plex Mono,monospace" text-anchor="middle">${h>12?h-12:h}${h>=12?'PM':'AM'}</text>`;
+    s+=`<text x="${x+barW/2}" y="${y-3}" fill="#8BA3CC" font-size="9" font-family="IBM Plex Mono,monospace" text-anchor="middle">${pct}%</text>`;
+  });
+  svg.innerHTML=s;
+}
+
+// ============================================================
+// ANALYTICS TAB
+// ============================================================
+function renderAnalytics() {
+  // Trend chart
+  const svg=document.getElementById('trendSvg');
+  const W=500,H=200,PAD={t:10,b:30,l:40,r:10};
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const vals=[58,62,71,65,78,85,57];
+  const maxV=100,chartH=H-PAD.t-PAD.b;
+  const stepX=(W-PAD.l-PAD.r)/(days.length-1);
+  let pts='',dots='',labels='';
+  days.forEach((d,i)=>{
+    const x=PAD.l+i*stepX,y=PAD.t+chartH*(1-vals[i]/maxV);
+    pts+=(i===0?'M':'L')+x+' '+y+' ';
+    dots+=`<circle cx="${x}" cy="${y}" r="5" fill="var(--saffron)" stroke="var(--navy)" stroke-width="2"/>`;
+    dots+=`<text x="${x}" y="${y-10}" fill="#8BA3CC" font-size="10" font-family="IBM Plex Mono,monospace" text-anchor="middle">${vals[i]}%</text>`;
+    labels+=`<text x="${x}" y="${H-5}" fill="#4A6080" font-size="10" font-family="Rajdhani,sans-serif" text-anchor="middle">${d}</text>`;
+  });
+  [25,50,75,100].forEach(v=>{
+    const y=PAD.t+chartH*(1-v/maxV);
+    svg.innerHTML+=`<line x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+  });
+  svg.innerHTML+=`<path d="${pts}" fill="none" stroke="var(--saffron)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}`;
+
+  // Peak forecast
+  const days2=['Sun Jun 8','Mon Jun 9','Tue Jun 10','Wed Jun 11','Thu Jun 12','Fri Jun 13','Sat Jun 14'];
+  const peaks=['6AM–9AM, 4PM–8PM','7AM–10AM, 3PM–7PM','Mauni Amavasya — ALL DAY PEAK','5AM–11AM (Special Snan)','6AM–9AM','7AM–9AM','6AM–10AM, 3PM–9PM'];
+  const levels=['medium','medium','critical','high','low','low','high'];
+  const lcols={critical:'var(--red)',high:'var(--yellow)',medium:'var(--saffron)',low:'var(--green)'};
+  document.getElementById('peakForecast').innerHTML=days2.map((d,i)=>`
+    <div class="trend-row">
+      <span class="trend-label">${d}</span>
+      <span style="font-size:11px;color:${lcols[levels[i]]};font-family:'IBM Plex Mono',monospace">${peaks[i]}</span>
+    </div>`).join('');
+
+  // Metrics
+  const metrics=[
+    ['Avg. daily pilgrims','~1.2M','trend-up'],
+    ['Peak concurrent density','92% (1PM)','trend-up'],
+    ['Incidents (last 24h)','3','trend-neutral'],
+    ['Avg. ghat wait time','22 min','trend-neutral'],
+    ['Safe routes utilization','68%','trend-down'],
+    ['Crowd prediction accuracy','94.7%','trend-down'],
+    ['Emergency response time','4.2 min','trend-down'],
+  ];
+  document.getElementById('metricsTable').innerHTML=metrics.map(([l,v,cls])=>`
+    <div class="trend-row">
+      <span class="trend-label">${l}</span>
+      <span class="trend-val ${cls}">${v}</span>
+    </div>`).join('');
+
+  // AI recs
+  document.getElementById('aiRecs').innerHTML=`
+    ✦ Deploy additional police personnel at Dashashwamedh Ghat — critical threshold breached.<br>
+    ✦ Activate shuttle service from Parking Zone B to alternate ghats to reduce congestion.<br>
+    ✦ Issue advisory for pilgrims: visit Triveni Sangam before 9AM or after 7PM.<br>
+    ✦ Consider temporary access restriction to Parking Zone B (78% full).<br>
+    ✦ Tuesday (Jun 10) Mauni Amavasya: mobilize full emergency protocol, expect 3.5× crowd.`;
+}
+
+// ============================================================
+// AUTHORITY TAB
+// ============================================================
+function renderAuthority() {
+  document.getElementById('policePanel').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+      ${[['Dashashwamedh Ghat','12 units','🔴 Critical'],['Ram Ghat','6 units','🟡 Elevated'],['Triveni Sangam','4 units','🟢 Normal'],['Prayagraj Junction','8 units','🟡 Elevated'],['All Parking Zones','6 units','🟢 Normal']].map(([z,u,s])=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--panel-border);">
+        <span style="color:var(--text-mid)">${z}</span>
+        <span style="font-family:'IBM Plex Mono',monospace;color:var(--saffron)">${u}</span>
+        <span style="font-size:11px">${s}</span>
+      </div>`).join('')}
+    </div>`;
+
+  document.getElementById('medicalPanel').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+      ${[['Medical Post A — Ram Ghat','2 doctors, 5 paramedics','Active'],['Medical Post B — Dashashwamedh','3 doctors, 8 paramedics','Active'],['Field Hospital — Parade Ground','10 doctors, 20 nurses','Active'],['Ambulance Dispatch — Junction','6 ambulances','Standby'],['Mental Health Unit — Park B','2 counselors','Active']].map(([n,s,st])=>`
+      <div style="padding:8px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid var(--panel-border);">
+        <div style="font-weight:700;color:var(--text-bright);margin-bottom:2px;">${n}</div>
+        <div style="color:var(--text-dim);font-size:11px;">${s} · <span style="color:var(--green)">${st}</span></div>
+      </div>`).join('')}
+    </div>`;
+
+  const msgs=['Avoid Dashashwamedh Ghat — critical congestion. Use Northern Riverside Path.','Free shuttle from Prayagraj Junction to Triveni Sangam — departs every 15 mins.','Parking Zone C available — lowest congestion. Shuttle to all ghats provided.','Mauni Amavasya Snan on June 10 — arrive before 6AM for best access.'];
+  document.getElementById('broadcastPanel').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+      ${msgs.map((m,i)=>`<div style="padding:10px;background:rgba(255,107,0,0.06);border-radius:8px;border:1px solid var(--panel-border);font-size:12px;color:var(--text-mid);">
+        <span style="color:var(--saffron);font-weight:700;">#${i+1}</span> ${m}</div>`).join('')}
+    </div>
+    <button onclick="alert('Broadcast sent to all registered pilgrims!')" style="width:100%;padding:8px;background:var(--saffron);border:none;border-radius:8px;color:white;font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;">📢 BROADCAST ALERT</button>`;
+
+  document.getElementById('incidentLog').innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="border-bottom:1px solid var(--panel-border);">
+        ${['Time','Location','Type','Severity','Status','Responders'].map(h=>`<th style="padding:8px;text-align:left;color:var(--text-dim);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:10px;">${h}</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        ${[
+          ['11:24 PM','Dashashwamedh Ghat','Overcrowding','CRITICAL','Active','12 Police, 2 Medical'],
+          ['11:16 PM','Parking Zone B','Capacity Alert','WARNING','Monitoring','3 Police'],
+          ['10:52 PM','Ram Ghat','Minor Stampede','CRITICAL','Resolved','8 Police, 4 Medical'],
+          ['10:30 PM','Prayagraj Junction','Traffic Jam','WARNING','Resolved','6 Police'],
+          ['09:45 PM','Main Bazaar','Medical Emergency','HIGH','Resolved','2 Medical'],
+        ].map(row=>`<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+          ${row.map((cell,i)=>{
+            let col='var(--text-mid)';
+            if(i===3){col=cell==='CRITICAL'?'var(--red)':cell==='WARNING'?'var(--yellow)':'var(--text-mid)';}
+            if(i===4){col=cell==='Active'?'var(--red)':cell==='Monitoring'?'var(--yellow)':'var(--green)';}
+            return `<td style="padding:8px 8px;color:${col};font-family:${i===0?'IBM Plex Mono,monospace':'inherit'}">${cell}</td>`;
+          }).join('')}
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='simulation'){renderSimGrid();renderSimChart();}
+  if(name==='analytics'){renderAnalytics();}
+  if(name==='authority'){renderAuthority();}
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  renderMap();
+  renderDensityList();
+  renderChart();
+  renderRoutes();
+  renderAlerts();
+  updateStats();
+  renderSimGrid();
+  renderSimChart();
+
+  // Welcome message
+  addMessage("🙏 Namaste! I'm KumbhFlow AI — your intelligent crowd guide for Mahakumbh 2028. I have live data on all ghats, parking zones, and safe routes. How can I help you today?", 'bot');
+}
+
+init();
+</script>
+</body>
+</html>
